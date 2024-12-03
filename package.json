@@ -1,18 +1,36 @@
 {
     "dependencies": {
         "commander": "^12.1.0",
-        "diffparser": "^2.0.1"
+        "diffparser": "^2.0.1",
+        "get-port-please": "^3.1.2",
+        "openurl": "^1.1.1",
+        "static-server": "^2.2.1",
+        "superstatic": "^9.1.0"
     },
     "devDependencies": {
         "@types/node": "^22.10.1",
+        "@types/openurl": "^1.0.3",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "axios": "^1.7.8",
         "tsc-watch": "^6.2.1",
-        "typescript": "^5.7.2"
+        "typescript": "^5.7.2",
+        "vite": "^6.0.2",
+        "vue": "^3.5.13",
+        "vue-tsc": "^2.1.10"
     },
-    "name": "difftool",
-    "version": "1.0.0",
-    "main": "index.js",
+    "name": "@anfo/difftool",
+    "version": "0.0.1",
+    "bin": {
+        "anfodiff": "index.js"
+    },
+    "files": [
+        "dist",
+        "index.js"
+    ],
     "scripts": {
-        "dev": "tsc && node index.js"
+        "buildJSON": "tsc && node index.js",
+        "dev": "vite",
+        "build": "vite build"
     },
     "keywords": [],
     "author": "",
