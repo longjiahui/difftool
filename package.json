@@ -1,0 +1,21 @@
+{
+    "dependencies": {
+        "commander": "^12.1.0",
+        "diffparser": "^2.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.1",
+        "tsc-watch": "^6.2.1",
+        "typescript": "^5.7.2"
+    },
+    "name": "difftool",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "dev": "tsc && node index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": ""
+}
