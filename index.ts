@@ -8,7 +8,7 @@ program
         const result = execSync(`git diff ${commitA} ${commitB}`, {
             stdio: 'pipe',
         })
-        // console.log(result.toString())
+        console.log(result.toString())
     })
 
 program.parse(process.argv)

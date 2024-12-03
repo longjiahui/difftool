@@ -9,6 +9,6 @@ commander_1.program
     const result = (0, node_child_process_1.execSync)(`git diff ${commitA} ${commitB}`, {
         stdio: 'pipe',
     });
-    // console.log(result.toString())
+    console.log(result.toString());
 });
 commander_1.program.parse(process.argv);
