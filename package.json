@@ -4,8 +4,7 @@
         "diffparser": "^2.0.1",
         "get-port-please": "^3.1.2",
         "openurl": "^1.1.1",
-        "static-server": "^2.2.1",
-        "superstatic": "^9.1.0"
+        "static-server": "^2.2.1"
     },
     "devDependencies": {
         "@types/node": "^22.10.1",
@@ -19,7 +18,7 @@
         "vue-tsc": "^2.1.10"
     },
     "name": "@anfo/difftool",
-    "version": "0.0.1",
+    "version": "0.0.5",
     "bin": {
         "anfodiff": "index.js"
     },
@@ -28,9 +27,10 @@
         "index.js"
     ],
     "scripts": {
-        "buildJSON": "tsc && node index.js",
-        "dev": "vite",
-        "build": "vite build"
+        "build": "tsc && node index.js -h",
+        "dev:web": "vite",
+        "build:web": "vite build",
+        "prepublish": "npm run buildJSON"
     },
     "keywords": [],
     "author": "",
