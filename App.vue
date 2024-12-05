@@ -77,12 +77,10 @@
                         v-for="(change, k) in chunk.changes"
                         :key="k"
                         :class="[
-                            'px-4',
+                            'px-4 whitespace-pre-wrap break-all',
                             change.add ? 'text-[#333] bg-[#EBF6F1]' : '',
                             change.del ? 'text-[#FF4D36] bg-[#FFF6F4]' : '',
-                        ]"
-                        >{{ change.content }}</pre
-                    >
+                        ]">{{ change.content.slice(0, 1024) }} <span v-if="change.content.length > 1024" class="bg-black text-white">[{{ change.content.length }} chars]...</span></pre>
                 </div>
             </div>
         </div>

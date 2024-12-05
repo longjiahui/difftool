@@ -21,7 +21,7 @@
         "vue-tsc": "^2.1.10"
     },
     "name": "@anfo/difftool",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "bin": {
         "anfodiff": "index.js"
     },
