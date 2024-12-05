@@ -7,10 +7,13 @@
         "static-server": "^2.2.1"
     },
     "devDependencies": {
+        "@ant-design/icons-vue": "^7.0.1",
         "@types/node": "^22.10.1",
         "@types/openurl": "^1.0.3",
         "@vitejs/plugin-vue": "^5.2.1",
         "axios": "^1.7.8",
+        "gsap": "^3.12.5",
+        "highlight.js": "^11.10.0",
         "tsc-watch": "^6.2.1",
         "typescript": "^5.7.2",
         "vite": "^6.0.2",
@@ -18,7 +21,7 @@
         "vue-tsc": "^2.1.10"
     },
     "name": "@anfo/difftool",
-    "version": "0.0.5",
+    "version": "0.0.8",
     "bin": {
         "anfodiff": "index.js"
     },
@@ -30,7 +33,8 @@
         "build": "tsc && node index.js -h",
         "dev:web": "vite",
         "build:web": "vite build",
-        "prepublish": "npm run buildJSON"
+        "prepublishOnly": "npm run build & npm run build:web",
+        "prepack": "npm run prepublishOnly"
     },
     "keywords": [],
     "author": "",

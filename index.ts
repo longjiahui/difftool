@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { program } from 'commander'
 import parser from 'diffparser'
 import fs from 'fs'
@@ -35,13 +35,21 @@ program
                         )
                         .toString()
                 } else {
-                    result = execSync(
-                        `git diff --submodule=diff ${commitA} ${commitB}`,
-                        {
-                            stdio: 'pipe',
-                            cwd: process.cwd(),
-                        }
-                    ).toString()
+                    await new Promise<void>((r, reject) => {
+                        const stream = spawn(
+                            'git',
+                            ['diff', '--submodule=diff', commitA, commitB],
+                            {
+                                stdio: 'pipe',
+                                cwd: process.cwd(),
+                            }
+                        )
+                        stream.stdout.on('data', (d) => {
+                            result += d
+                        })
+                        stream.stderr.on('data', (d) => reject(d))
+                        stream.on('close', () => r())
+                    })
                 }
                 diff = parser(result.toString())
             } else {

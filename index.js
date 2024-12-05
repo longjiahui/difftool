@@ -37,10 +37,17 @@ commander_1.program
                 .toString();
         }
         else {
-            result = (0, node_child_process_1.execSync)(`git diff --submodule=diff ${commitA} ${commitB}`, {
-                stdio: 'pipe',
-                cwd: process.cwd(),
-            }).toString();
+            yield new Promise((r, reject) => {
+                const stream = (0, node_child_process_1.spawn)('git', ['diff', '--submodule=diff', commitA, commitB], {
+                    stdio: 'pipe',
+                    cwd: process.cwd(),
+                });
+                stream.stdout.on('data', (d) => {
+                    result += d;
+                });
+                stream.stderr.on('data', (d) => reject(d));
+                stream.on('close', () => r());
+            });
         }
         diff = (0, diffparser_1.default)(result.toString());
     }

@@ -1,44 +1,72 @@
 <template>
     <div class="size-full flex items-stretch [&>div]:p-4 tracking-wide">
-        <div class="w-[320px] shrink-0 flex flex-col gap-2 overflow-auto">
-            <div
-                v-for="(diff, ind) in diffs"
-                :key="ind"
-                class="rounded p-1 px-3 [&>div]:break-all"
-                :style="{
-                    background: diff.deleted
-                        ? '#FFF6F4'
-                        : diff.new
-                        ? '#EBF6F1'
-                        : '#F0F0F0',
-                    color: diff.deleted ? '#FF4D36' : diff.new ? '#0CCA32' : '',
-                }"
-            >
-                <template v-if="!diff.deleted">
-                    <div v-if="diff.new">+</div>
-                    <div>
-                        {{ diff.to.slice(diff.to.lastIndexOf('/') + 1) }}
-                    </div>
-                    <div class="text-sm text-[#666]">
-                        {{ diff.to }}
+        <div class="w-[400px] shrink-0 flex flex-col gap-2 overflow-auto">
+            <Loop v-if="tree.length" :model-value="tree" default-expand-all>
+                <template #default="{ item, layer }">
+                    <div
+                        @click="handleClickSideItem(item.data)"
+                        class="flex items-center gap-2 relative p-[2px] clickable rounded"
+                        :style="{
+                            ...(item.dir
+                                ? {
+                                      opacity: 0.5,
+                                  }
+                                : {}),
+                            color:
+                                item.type === 'del'
+                                    ? '#FF4D36'
+                                    : item.type === 'add'
+                                    ? '#0CCA32'
+                                    : '',
+                        }"
+                    >
+                        <div
+                            :style="{
+                                width: `${layer * 24}px`,
+                            }"
+                        ></div>
+                        <div
+                            v-for="(_, i) in new Array(layer).fill(0)"
+                            :key="i"
+                            class="absolute top-0 text-[#ddd]"
+                            :style="{ left: `${i * 24 + 12}px` }"
+                        >
+                            |
+                        </div>
+                        <FolderOutlined v-if="item.dir"></FolderOutlined>
+                        <FileFilled v-else></FileFilled>
+                        <div>
+                            {{ item.name }}
+                        </div>
                     </div>
                 </template>
-                <template v-else>
-                    <div>-</div>
-                    <div>
-                        {{ diff.from.slice(diff.from.lastIndexOf('/') + 1) }}
-                    </div>
-                    <div class="text-sm text-[#666]">
-                        {{ diff.from }}
-                    </div>
-                </template>
-            </div>
+            </Loop>
         </div>
-        <div class="space-y-12 overflow-auto">
-            <div v-for="(diff, i) in diffs" :key="i" class="space-y-4">
-                <div class="flex items-center gap-4 text-[#666]">
+        <div ref="scrollContainerRef" class="space-y-12 overflow-auto relative">
+            <div v-for="(diff, i) in diffs" :key="i">
+                <div
+                    :data-file-path="diff.deleted ? diff.from : diff.to"
+                    class="sticky top-0 shadow-xl inline-flex items-center gap-2 bg-[#efefef] text-lg px-2 py-1 rounded"
+                >
                     <!-- <div>from : {{ diff.from }}</div> -->
-                    <div>{{ diff.deleted ? diff.from : diff.to }}</div>
+                    <span
+                        v-for="(d, i) in (diff.deleted
+                            ? diff.from
+                            : diff.to
+                        ).split('/')"
+                        :key="i"
+                        :class="
+                            i ===
+                            (diff.deleted ? diff.from : diff.to).split('/')
+                                .length -
+                                1
+                                ? 'font-bold'
+                                : ''
+                        "
+                    >
+                        <span v-if="i !== 0">/</span>
+                        {{ d }}
+                    </span>
                 </div>
                 <div
                     v-for="(chunk, j) in diff.chunks"
@@ -64,6 +92,8 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { ref } from 'vue'
+import Loop from './Loop.vue'
+import { FolderOutlined, FileFilled } from '@ant-design/icons-vue'
 
 interface Change {
     type: 'normal' | 'del' | 'add'
@@ -94,16 +124,86 @@ interface Diff {
     index: string[]
     to: string
 }
+interface Node {
+    id: string
+    name: string
+    dir: boolean
+    type: 'add' | 'del' | 'normal'
+    data: Diff
+    children: Node[]
+}
+function randomId() {
+    return `id${Math.random()}`
+}
+function buildTree(datas: Diff[]) {
+    const trees: Node[] = []
+    datas.forEach((d) => {
+        const path = d.deleted ? d.from : d.to
+        const paths = path.split('/')
+        const dirPaths = paths.slice(0, -1)
+        let t: Node | undefined
+        for (const p of dirPaths) {
+            let nextT = (t ? t.children : trees).find((t) => t.name === p)
+            if (!nextT) {
+                nextT = {
+                    data: d,
+                    id: randomId(),
+                    name: p,
+                    dir: true,
+                    type: d.deleted ? 'del' : d.new ? 'add' : 'normal',
+                    children: [],
+                }
+                if (t) {
+                    t.children.push(nextT)
+                } else {
+                    trees.push(nextT)
+                }
+            }
+            t = nextT
+        }
+        t?.children.push({
+            data: d,
+            type: d.deleted ? 'del' : d.new ? 'add' : 'normal',
+            id: randomId(),
+            name: paths.slice(-1)[0],
+            dir: false,
+            children: [],
+        })
+    })
+    return trees
+}
+
 const diffs = ref<Diff[]>([])
+const tree = ref<Node[]>([])
 axios.get('./diff.json').then((res) => {
     diffs.value = res.data
-    console.debug('diffs: ', res.data)
+    tree.value = buildTree(res.data)
+    console.debug('diffs: ', res.data, buildTree(res.data))
 })
+const scrollContainerRef = ref<HTMLDivElement>()
+function handleClickSideItem(item: Diff) {
+    document
+        .querySelector(
+            '[data-file-path="' + (item.deleted ? item.from : item.to) + '"]'
+        )
+        ?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+        })
+}
 </script>
 
 <style lang="css">
 body {
-    font: 14px / 1 'Helvetica Neue', Helvetica, Arial, 'Microsoft Yahei',
-        'Hiragino Sans GB', 'Heiti SC', 'WenQuanYi Micro Hei', sans-serif;
+    font: 14px / 1 Consolas, monospace, Mono 'Helvetica Neue', Helvetica, Arial,
+        'Microsoft Yahei', 'Hiragino Sans GB', 'Heiti SC', 'WenQuanYi Micro Hei',
+        sans-serif;
+}
+.clickable {
+    cursor: pointer;
+    transition-duration: 0.3s;
+    &:hover {
+        background: #efefef;
+    }
 }
 </style>
