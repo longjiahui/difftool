@@ -5,7 +5,7 @@
                 <template #default="{ item, layer }">
                     <div
                         @click="handleClickSideItem(item.data)"
-                        class="flex items-center gap-2 relative p-[2px] clickable rounded"
+                        class="[&>div]:shrink-0 flex items-center gap-2 relative p-[2px] clickable rounded"
                         :style="{
                             ...(item.dir
                                 ? {
