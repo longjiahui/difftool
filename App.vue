@@ -137,9 +137,14 @@ function buildTree(datas: Diff[]) {
     const trees: Node[] = []
     datas.forEach((d) => {
         const path = d.deleted ? d.from : d.to
-        const paths = path.split('/')
+        const paths = path.indexOf('/') !== -1 ? path.split('/') : [path]
         const dirPaths = paths.slice(0, -1)
         let t: Node | undefined
+        const type = d.deleted
+            ? 'del'
+            : d.new
+            ? 'add'
+            : ('normal' satisfies Node['type'])
         for (const p of dirPaths) {
             let nextT = (t ? t.children : trees).find((t) => t.name === p)
             if (!nextT) {
@@ -148,7 +153,7 @@ function buildTree(datas: Diff[]) {
                     id: randomId(),
                     name: p,
                     dir: true,
-                    type: d.deleted ? 'del' : d.new ? 'add' : 'normal',
+                    type,
                     children: [],
                 }
                 if (t) {
@@ -159,9 +164,20 @@ function buildTree(datas: Diff[]) {
             }
             t = nextT
         }
+        if (dirPaths.length === 0) {
+            // root
+            trees.push({
+                data: d,
+                id: randomId(),
+                name: path,
+                children: [],
+                dir: false,
+                type,
+            })
+        }
         t?.children.push({
             data: d,
-            type: d.deleted ? 'del' : d.new ? 'add' : 'normal',
+            type,
             id: randomId(),
             name: paths.slice(-1)[0],
             dir: false,
